@@ -6,8 +6,8 @@
   <title>Submit a Blog Post</title>
   <style>
     body {
-      background: #f4f6f9;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f2f5;
       padding: 40px 20px;
     }
 
@@ -15,141 +15,116 @@
       max-width: 600px;
       margin: auto;
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      padding: 40px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
 
     h2 {
       text-align: center;
-      color: #333;
       margin-bottom: 20px;
     }
 
     label {
       font-weight: 600;
-      margin-top: 16px;
+      margin-top: 20px;
       display: block;
-      color: #444;
     }
 
-    input[type="text"],
-    input[type="email"],
-    textarea {
+    input, textarea {
       width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+      padding: 12px;
       margin-top: 8px;
-      resize: vertical;
-      transition: border 0.3s;
-    }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    textarea:focus {
-      border-color: #0077ff;
-      outline: none;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
     }
 
     button {
-      background: #0077ff;
-      color: #fff;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      margin-top: 20px;
-      cursor: pointer;
       width: 100%;
+      padding: 14px;
+      margin-top: 30px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
       font-size: 16px;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background: #005cd6;
+      cursor: pointer;
     }
 
     .message {
-      margin-top: 20px;
       text-align: center;
+      margin-top: 20px;
       font-weight: bold;
     }
 
-    .success {
-      color: #2d9b3a;
+    .error {
+      color: red;
     }
 
-    .error {
-      color: #e54848;
+    .success {
+      color: green;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Submit a Blog Post</h2>
-    <form id="blogPostForm">
-      <label for="title">Post Title</label>
-      <input type="text" id="title" name="title" placeholder="Enter post title" required>
+    <form id="blogForm">
+      <label>Post Title</label>
+      <input type="text" id="title" required>
 
-      <label for="content">Post Content (HTML allowed)</label>
-      <textarea id="content" name="content" rows="8" placeholder="Write your post here..." required></textarea>
+      <label>Post Content (HTML allowed)</label>
+      <textarea id="content" rows="6" required></textarea>
 
-      <label for="labels">Tags (comma-separated)</label>
-      <input type="text" id="labels" name="labels" placeholder="e.g. tech, design, tutorial">
+      <label>Tags (comma separated)</label>
+      <input type="text" id="labels">
 
-      <label for="email">Your Email (optional)</label>
-      <input type="email" id="email" name="email" placeholder="you@example.com">
+      <label>Your Email</label>
+      <input type="email" id="email">
 
       <button type="submit">Publish Post</button>
-
       <div id="message" class="message"></div>
     </form>
   </div>
 
   <script>
-    const RAW_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFbaCu_UMkS8fpCniUu81ia8DmOe9nmoFvm5TAi9gyyXP4SowiGLB8lvO4ueOSDMJ/exec";
-    const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
-    const SCRIPT_URL = PROXY_URL + RAW_SCRIPT_URL;
+    const form = document.getElementById("blogForm");
+    const message = document.getElementById("message");
 
-    const form = document.getElementById("blogPostForm");
-    const messageEl = document.getElementById("message");
+    // Replace with your actual script URL:
+    const directScriptUrl = "https://script.google.com/macros/s/AKfycbzVFbaCu_UMkS8fpCniUu81ia8DmOe9nmoFvm5TAi9gyyXP4SowiGLB8lvO4ueOSDMJ/exec";
+    const scriptURL = "https://thingproxy.freeboard.io/fetch/" + directScriptUrl;
 
-    form.addEventListener("submit", async function (e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      messageEl.textContent = "Submitting...";
-      messageEl.className = "message";
+      message.textContent = "Submitting...";
+      message.className = "message";
 
       const formData = new URLSearchParams();
-      formData.append("title", form.title.value.trim());
-      formData.append("content", form.content.value.trim());
-      formData.append("labels", form.labels.value.trim());
-      formData.append("email", form.email.value.trim());
+      formData.append("title", document.getElementById("title").value.trim());
+      formData.append("content", document.getElementById("content").value.trim());
+      formData.append("labels", document.getElementById("labels").value.trim());
+      formData.append("email", document.getElementById("email").value.trim());
 
       try {
-        const response = await fetch(SCRIPT_URL, {
+        const res = await fetch(scriptURL, {
           method: "POST",
           body: formData
         });
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Expected JSON, got something else");
-        }
-
-        const result = await response.json();
+        const result = await res.json();
 
         if (result.status === "success") {
-          messageEl.textContent = "✅ Post submitted! View: " + result.url;
-          messageEl.classList.add("success");
+          message.innerHTML = `✅ Published! <a href="${result.url}" target="_blank">View Post</a>`;
+          message.classList.add("success");
           form.reset();
         } else {
-          messageEl.textContent = "❌ Failed: " + result.message;
-          messageEl.classList.add("error");
+          throw new Error(result.message);
         }
       } catch (err) {
-        messageEl.textContent = "⚠️ Error: " + err.message;
-        messageEl.classList.add("error");
-        console.error("Fetch error:", err);
+        message.textContent = "❌ Error: " + err.message;
+        message.classList.add("error");
       }
     });
   </script>
