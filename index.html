@@ -116,18 +116,16 @@
       messageEl.textContent = "Submitting...";
       messageEl.className = "message";
 
-      const formData = {
-        title: form.title.value.trim(),
-        content: form.content.value.trim(),
-        labels: form.labels.value.trim(),
-        email: form.email.value.trim()
-      };
+      const formData = new URLSearchParams();
+      formData.append("title", form.title.value.trim());
+      formData.append("content", form.content.value.trim());
+      formData.append("labels", form.labels.value.trim());
+      formData.append("email", form.email.value.trim());
 
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
+          body: formData
         });
 
         const result = await response.json();
