@@ -108,7 +108,9 @@
 
   <script>
     const RAW_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFbaCu_UMkS8fpCniUu81ia8DmOe9nmoFvm5TAi9gyyXP4SowiGLB8lvO4ueOSDMJ/exec";
-    const SCRIPT_URL = "https://corsproxy.io/?" + encodeURIComponent(RAW_SCRIPT_URL);
+    const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
+    const SCRIPT_URL = PROXY_URL + RAW_SCRIPT_URL;
+
     const form = document.getElementById("blogPostForm");
     const messageEl = document.getElementById("message");
 
@@ -128,6 +130,11 @@
           method: "POST",
           body: formData
         });
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Expected JSON, got something else");
+        }
 
         const result = await response.json();
 
