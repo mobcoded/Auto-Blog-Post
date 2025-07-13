@@ -117,23 +117,33 @@
       messageEl.className = "message";
 
       const formData = new URLSearchParams();
-formData.append("title", form.title.value);
-formData.append("content", form.content.value);
-formData.append("labels", form.labels.value);
-formData.append("email", form.email.value);
+      formData.append("title", form.title.value.trim());
+      formData.append("content", form.content.value.trim());
+      formData.append("labels", form.labels.value.trim());
+      formData.append("email", form.email.value.trim());
 
-fetch(SCRIPT_URL, {
-  method: "POST",
-  body: formData
-})
-.then(res => res.json())
-.then(result => {
-  // success logic
-})
-.catch(error => {
-  console.error("Fetch error:", error);
-});
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData,
+        });
 
+        const result = await response.json();
+
+        if (result.status === "success") {
+          messageEl.textContent = "✅ Post submitted! View: " + result.url;
+          messageEl.classList.add("success");
+          form.reset();
+        } else {
+          messageEl.textContent = "❌ Failed: " + result.message;
+          messageEl.classList.add("error");
+        }
+      } catch (err) {
+        messageEl.textContent = "⚠️ Error: Failed to fetch";
+        messageEl.classList.add("error");
+        console.error("Fetch error:", err);
+      }
+    });
   </script>
 </body>
 </html>
