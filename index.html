@@ -107,7 +107,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFbaCu_UMkS8fpCniUu81ia8DmOe9nmoFvm5TAi9gyyXP4SowiGLB8lvO4ueOSDMJ/exec";
+    const RAW_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFbaCu_UMkS8fpCniUu81ia8DmOe9nmoFvm5TAi9gyyXP4SowiGLB8lvO4ueOSDMJ/exec";
+    const SCRIPT_URL = "https://corsproxy.io/?" + encodeURIComponent(RAW_SCRIPT_URL);
     const form = document.getElementById("blogPostForm");
     const messageEl = document.getElementById("message");
 
@@ -125,7 +126,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          body: formData,
+          body: formData
         });
 
         const result = await response.json();
@@ -139,7 +140,7 @@
           messageEl.classList.add("error");
         }
       } catch (err) {
-        messageEl.textContent = "⚠️ Error: Failed to fetch";
+        messageEl.textContent = "⚠️ Error: " + err.message;
         messageEl.classList.add("error");
         console.error("Fetch error:", err);
       }
